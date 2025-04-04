@@ -9,6 +9,38 @@ const uploadBox = document.querySelector(".upload-box"),
 
 let ogImageRatio;
 
+uploadBox.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadBox.classList.add('dragging');
+});
+
+uploadBox.addEventListener('dragleave', () => {
+    uploadBox.classList.remove('dragging');
+});
+
+// Prevent default behavior on dragover and dragenter
+uploadBox.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadBox.classList.add('dragging');
+});
+
+uploadBox.addEventListener('dragleave', () => {
+    uploadBox.classList.remove('dragging');
+});
+
+uploadBox.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadBox.classList.remove('dragging');
+    const droppedFile = e.dataTransfer.files[0];
+    if (droppedFile && droppedFile.type.startsWith('image/')) {
+        fileInput.files = e.dataTransfer.files;
+        loadFile({ target: fileInput });
+    } else {
+        alert("Please drop a valid image file.");
+    }
+});
+
+
 const loadFile = (e) => {
     const file = e.target.files[0];
     if (!file.type.startsWith("image/")) {
