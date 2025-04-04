@@ -8,17 +8,9 @@ const uploadBox = document.querySelector(".upload-box"),
     downloadBtn = document.querySelector(".download-btn");
 
 let ogImageRatio;
+let ogFileType = 'image/jpeg'; // default fallback
+let ogExtension = 'jpg';       // default extension
 
-uploadBox.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    uploadBox.classList.add('dragging');
-});
-
-uploadBox.addEventListener('dragleave', () => {
-    uploadBox.classList.remove('dragging');
-});
-
-// Prevent default behavior on dragover and dragenter
 uploadBox.addEventListener('dragover', (e) => {
     e.preventDefault();
     uploadBox.classList.add('dragging');
@@ -40,14 +32,17 @@ uploadBox.addEventListener('drop', (e) => {
     }
 });
 
-
 const loadFile = (e) => {
     const file = e.target.files[0];
-    if (!file.type.startsWith("image/")) {
-    alert("Please upload a valid image file.");
-    return;
+    if (!file || !file.type.startsWith("image/")) {
+        alert("Please upload a valid image file.");
+        return;
     }
-    if (!file) return;
+
+    // Extract and store original file type and extension
+    ogFileType = file.type;
+    ogExtension = file.name.split('.').pop().toLowerCase();
+
     previewImg.src = URL.createObjectURL(file);
     previewImg.addEventListener('load', () => {
         widthInput.value = previewImg.naturalWidth;
@@ -68,21 +63,27 @@ heightInput.addEventListener('keyup', () => {
 });
 
 const resizeAndDownload = () => {
-    const canvas  = document.createElement("canvas");
-    const a  = document.createElement("a");
+    const canvas = document.createElement("canvas");
+    const a = document.createElement("a");
     const ctx = canvas.getContext("2d");
 
     const imgQuality = qualityInput.checked ? 0.7 : 1.0;
 
     canvas.width = widthInput.value;
     canvas.height = heightInput.value;
+    ctx.drawImage(previewImg, 0, 0, canvas.width, canvas.height);
 
-    //drawing image (image, x-cord, y-cord, width, height)
-    ctx.drawImage(previewImg, 0 , 0, canvas.width, canvas.height);
-    a.href = canvas.toDataURL("image/jpeg", imgQuality);
-    a.download = new Date().getTime();
+    // Convert to correct format based on original file type
+    let dataURL;
+    if (ogFileType === 'image/png') {
+        dataURL = canvas.toDataURL('image/png');
+    } else {
+        dataURL = canvas.toDataURL('image/jpeg', imgQuality);
+    }
+
+    a.href = dataURL;
+    a.download = `resized-image.${ogExtension}`;
     a.click();
-
 }
 
 downloadBtn.addEventListener('click', resizeAndDownload);
