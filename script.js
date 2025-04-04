@@ -11,6 +11,10 @@ let ogImageRatio;
 
 const loadFile = (e) => {
     const file = e.target.files[0];
+    if (!file.type.startsWith("image/")) {
+    alert("Please upload a valid image file.");
+    return;
+    }
     if (!file) return;
     previewImg.src = URL.createObjectURL(file);
     previewImg.addEventListener('load', () => {
